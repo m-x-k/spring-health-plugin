@@ -1,6 +1,5 @@
 package com.mxk.actuator.builder;
 
-import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.mxk.actuator.installation.ActuatorInstallation;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.json.JsonSlurper;
@@ -27,7 +26,8 @@ import java.util.Map;
 
 public class ActuatorBuilder extends Builder implements SimpleBuildStep, Serializable {
 
-    private final String url;
+    private String url;
+    private HttpClient client;
 
     @Extension
     public static final StepDescriptor DESCRIPTOR = new StepDescriptor();
@@ -35,6 +35,7 @@ public class ActuatorBuilder extends Builder implements SimpleBuildStep, Seriali
     @DataBoundConstructor
     public ActuatorBuilder(String url) {
         this.url = url;
+        this.client = new HttpClient();
     }
 
     @Override
@@ -43,9 +44,7 @@ public class ActuatorBuilder extends Builder implements SimpleBuildStep, Seriali
     }
 
     @Override
-    public void perform(Run build, FilePath workspace, Launcher launcher, TaskListener listener)
-            throws InterruptedException, IOException {
-        HttpClient client = new HttpClient();
+    public void perform(Run build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         HttpMethod method = new GetMethod(url);
         int responseCode = client.executeMethod(method);
         if (responseCode != 200) {
@@ -63,7 +62,7 @@ public class ActuatorBuilder extends Builder implements SimpleBuildStep, Seriali
         return url;
     }
 
-    public static final class StepDescriptor <C extends StandardCredentials> extends BuildStepDescriptor<Builder> {
+    public static class StepDescriptor extends BuildStepDescriptor<Builder> {
         private volatile ActuatorInstallation[] installations = new ActuatorInstallation[0];
 
         public StepDescriptor() {
@@ -91,4 +90,13 @@ public class ActuatorBuilder extends Builder implements SimpleBuildStep, Seriali
             return "Invoke Actuator";
         }
     }
+
+    public HttpClient getClient() {
+        return client;
+    }
+
+    public void setClient(HttpClient client) {
+        this.client = client;
+    }
+
 }
