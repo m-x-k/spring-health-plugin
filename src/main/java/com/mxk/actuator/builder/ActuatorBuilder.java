@@ -3,6 +3,7 @@ package com.mxk.actuator.builder;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.mxk.actuator.installation.ActuatorInstallation;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import groovy.json.JsonSlurper;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
@@ -14,12 +15,14 @@ import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import jenkins.tasks.SimpleBuildStep;
-import org.apache.commons.httpclient.*;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Map;
 
 
 public class ActuatorBuilder extends Builder implements SimpleBuildStep, Serializable {
@@ -49,7 +52,11 @@ public class ActuatorBuilder extends Builder implements SimpleBuildStep, Seriali
             throw new AbortException("Failed to reach health endpoint: " + url);
         }
 
-        listener.getLogger().println("Hello World: " + url);
+        String response = method.getResponseBodyAsString();
+        JsonSlurper slurper = new JsonSlurper();
+        Map json = (Map) slurper.parseText(response);
+
+        listener.getLogger().println("Health check response: " + url + " " + json.get("status"));
     }
 
     public String getUrl() {
