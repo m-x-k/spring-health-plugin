@@ -25,10 +25,7 @@ import java.io.File;
 import java.io.PrintStream;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.startsWith;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @RunWith(PowerMockRunner.class)
